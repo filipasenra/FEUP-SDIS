@@ -54,7 +54,7 @@ public class EchoServer {
         }
 
         String oper = tokens[0];
-        String DNSName = tokens[1];
+        String DNSName = tokens[1].trim();
 
         if (oper.equals("REGISTER")) {
 
@@ -69,12 +69,10 @@ public class EchoServer {
 
         } else if (oper.equals("LOOKUP")) {
 
-            System.out.println("|" + DNSName + "|");
-
             if (database.containsKey(DNSName)){
 
                 response = database.get(DNSName);
-                
+
             } else {
                 response = "NOT_FOUND"; // make this a MACRO
             }
