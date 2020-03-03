@@ -1,14 +1,18 @@
+package i01;
+
 import java.io.IOException;
 import java.net.*;
 
-enum TypeOper {
-    REGISTER, LOOKUP
-}
+//Call outside of folder i01
+// javac i01/EchoClient.java
+// java i01/EchoClient localhost 1025 lookup ola or register ola 123
+// or
+// java i01/EchoClient localhost 1025 lookup ola or register ola 123
 
 public class EchoClient {
 
     private static String host;
-    private static String port;
+    private static int port;
     private static TypeOper oper;
     private static String DNSName;
     private static String ipAddress;
@@ -20,12 +24,11 @@ public class EchoClient {
 
         // send request
         DatagramSocket socket = new DatagramSocket();
-        int port = Integer.parseInt(args[1]);
 
         String request = buildRequest();
 
         byte[] sbuf = request.getBytes();
-        InetAddress address = InetAddress.getByName(args[0]);
+        InetAddress address = InetAddress.getByName(host);
         DatagramPacket packet = new DatagramPacket(sbuf, sbuf.length, address, port);
 
         socket.send(packet);
@@ -67,7 +70,8 @@ public class EchoClient {
         }
 
         host = args[0];
-        port = args[1];
+
+        port = Integer.parseInt(args[1]);
 
         if (args[2].equals("register"))
             oper = TypeOper.REGISTER;

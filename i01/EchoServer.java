@@ -1,6 +1,12 @@
+package i01;
+
 import java.io.IOException;
 import java.net.*;
 import java.util.HashMap;
+
+//Call outside of folder i01
+// javac i01/EchoServer.java
+// java i01/EchoServer 1025
 
 public class EchoServer {
 
@@ -56,7 +62,7 @@ public class EchoServer {
         String oper = tokens[0];
         String DNSName = tokens[1].trim();
 
-        if (oper.equals("REGISTER")) {
+        if (oper.equals(TypeOper.REGISTER.name())) {
 
             if (!database.containsKey(DNSName)) {
 
@@ -67,7 +73,7 @@ public class EchoServer {
                 response = "-1"; // make this a MACRO
             }
 
-        } else if (oper.equals("LOOKUP")) {
+        } else if (oper.equals(TypeOper.LOOKUP.name())) {
 
             if (database.containsKey(DNSName)){
 
