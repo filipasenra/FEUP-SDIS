@@ -3,30 +3,25 @@ package i02;
 import java.io.IOException;
 import java.net.*;
 
-//Call outside of folder i02
-//javac i02/EchoClient.java 
-//java i02/EchoClient 224.0.0.1 1025 lookup ola 
-// or 
-//java i02/EchoClient 224.0.0.1 1025 register ola 123
+public class ClientHandler {
 
-public class EchoClient {
+    private String mcast_addr; //hostname
+    private int port;
+    private TypeOper oper;
+    private String DNSName;
+    private String ipAddress;
+    private int srvc_port;
+    private String srvc_address;
 
-    private static String mcast_addr; //hostname
-    private static int port;
-    private static TypeOper oper;
-    private static String DNSName;
-    private static String ipAddress;
-    private static int srvc_port;
-    private static String srvc_address;
+    public ClientHandler(){
 
-    public static void main(final String[] args) throws IOException {
-        if (!parseArgs(args)) {
-            return;
-        }
+    }
+
+    public void connectToServer() throws IOException{
 
         //Receiving the info host
-        final MulticastSocket multiSocket = new MulticastSocket(port);
-        final InetAddress group = InetAddress.getByName(mcast_addr);
+        final MulticastSocket multiSocket = new MulticastSocket(this.port);
+        final InetAddress group = InetAddress.getByName(this.mcast_addr);
         multiSocket.joinGroup(group);
 
         final byte[] infoPacketArray = new byte[256];
@@ -39,14 +34,18 @@ public class EchoClient {
         multiSocket.leaveGroup(group);
         multiSocket.close();
 
+    }
+
+    public void service() throws IOException{
+
         DatagramSocket socket = new DatagramSocket();
 
         // send request
         final String request = buildRequest();
 
         final byte[] sbuf = request.getBytes();
-        final InetAddress address = InetAddress.getByName(srvc_address);
-        final DatagramPacket packet = new DatagramPacket(sbuf, sbuf.length, address, srvc_port);
+        final InetAddress address = InetAddress.getByName(this.srvc_address);
+        final DatagramPacket packet = new DatagramPacket(sbuf, sbuf.length, address, this.srvc_port);
 
         socket.send(packet);
 
@@ -61,15 +60,16 @@ public class EchoClient {
         System.out.println("Client: " + received);
 
         socket.close();
+
     }
 
-    private static String buildRequest() {
+    private String buildRequest() {
 
-        String request = oper + " " + DNSName;
+        String request = this.oper + " " + this.DNSName;
 
-        if (oper == TypeOper.REGISTER) {
+        if (this.oper == TypeOper.REGISTER) {
 
-            request += " " + ipAddress;
+            request += " " + this.ipAddress;
 
         }
 
@@ -77,7 +77,7 @@ public class EchoClient {
 
     }
 
-    private static void parseInfoHost(String infoHost){
+    private void parseInfoHost(String infoHost){
 
         String[] tokens = infoHost.split(" ", 2);
 
@@ -87,34 +87,27 @@ public class EchoClient {
             System.exit(-1);
         }
 
-        srvc_address = tokens[0].trim();
-        srvc_port = Integer.parseInt(tokens[1].trim());
+        this.srvc_address = tokens[0].trim();
+        this.srvc_port = Integer.parseInt(tokens[1].trim());
 
 
     }
 
-    private static boolean parseArgs(final String[] args) {
+    public boolean setAttributes(String[] args) {
 
-        if (args.length < 3) {
-
-            System.out.println("Usage: java client <mcast_addr> <mcast_port> <oper> <opnd>");
-
-            return false;
-        }
-
-        mcast_addr = args[0];
-        port = Integer.parseInt(args[1]);
+        this.mcast_addr = args[0];
+        this.port = Integer.parseInt(args[1]);
 
         if (args[2].equals("register"))
-            oper = TypeOper.REGISTER;
+            this.oper = TypeOper.REGISTER;
         else if (args[2].equals("lookup"))
-            oper = TypeOper.LOOKUP;
+            this.oper = TypeOper.LOOKUP;
         else {
             System.out.println("Usage: <oper> must be 'register' or 'lookup'");
             return false;
         }
 
-        if (oper == TypeOper.REGISTER) {
+        if (this.oper == TypeOper.REGISTER) {
 
             if (args.length != 5) {
                 System.out.println("Usage: Client <hostname> <port> register <DNS name> <IP address>");

@@ -9,43 +9,43 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-//Call outside of folder i02
-// javac i02/EchoServer.java
-// java i02/EchoServer 1024 224.0.0.1 1025
+public class ServerHandler {
 
-public class EchoServer {
+    private int srvc_port;
+    private String mcast_addr;
+    private int mcast_port;
 
-    private static int srvc_port;
-    private static String mcast_addr;
-    private static int mcast_port;
-
-    private static HashMap<String, String> database = new HashMap<String, String>();
+    private HashMap<String, String> database = new HashMap<String, String>();
 
     static String NOT_REGISTER = "-1";
     static String NOT_FIND = "NOT_FOUND";
 
-    public static void main(String[] args) throws IOException {
+    ScheduledThreadPoolExecutor scheduler;
+    ScheduledFuture<?> advertiser;
 
-        if (!parseArgs(args)) {
-            return;
-        }
-
-        String message = "localhost " + srvc_port;
-        final ScheduledThreadPoolExecutor scheduler = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
-        final ScheduledFuture<?> advertiser = scheduler.scheduleAtFixedRate(
-                new SenderOfMessages(srvc_port, "localhost", mcast_addr, mcast_port, message), 2, 1, TimeUnit.SECONDS);
-
-        service();
-
-        advertiser.cancel(true);
-        scheduler.shutdown();
+    public ServerHandler(){
 
     }
 
-    public static void service() throws IOException {
+    public void setUpScheduledMessages() throws IOException {
+
+
+        String message = "localhost " + this.srvc_port;
+        this.scheduler = (ScheduledThreadPoolExecutor) Executors.newScheduledThreadPool(1);
+        this.advertiser = this.scheduler.scheduleAtFixedRate(new SenderOfMessages(this.srvc_port, "localhost", this.mcast_addr, this.mcast_port, message), 2, 1, TimeUnit.SECONDS);
+
+    }
+
+    public void endScheduledMessages(){
+
+        this.advertiser.cancel(true);
+        this.scheduler.shutdown();
+    }
+
+    public void service() throws IOException {
 
         // send request
-        DatagramSocket socket = new DatagramSocket(srvc_port);
+        DatagramSocket socket = new DatagramSocket(this.srvc_port);
 
         while (true) {
 
@@ -74,7 +74,7 @@ public class EchoServer {
 
     }
 
-    private static String parseRequest(String received) {
+    private String parseRequest(String received) {
 
         String response = "";
 
@@ -120,22 +120,19 @@ public class EchoServer {
 
     }
 
-    private static boolean parseArgs(String[] args) {
-
-        if (args.length != 3) {
-            System.out.println("Usage: java Server <srvc_port> <mcast_addr> <mcast_port> ");
-            return false;
-        }
-
-        srvc_port = Integer.parseInt(args[0]);
-        mcast_addr = args[1];
-        mcast_port = Integer.parseInt(args[2]);
-
-        return true;
-
+    public void setSrvcPort(int srvc_port){
+        this.srvc_port = srvc_port;
     }
 
-    static class SenderOfMessages implements Runnable {
+    public void setMcastAddr(String mcast_addr){
+        this.mcast_addr = mcast_addr;
+    }
+
+    public void setMcastPort(int mcast_port){
+        this.mcast_port = mcast_port;
+    }
+
+    public class SenderOfMessages implements Runnable {
 
         private int srvc_port;
         private String mcast_addr;
