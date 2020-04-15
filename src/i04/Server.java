@@ -1,13 +1,6 @@
-package i07;
+package i04;
 
 import java.io.IOException;
-import java.net.*;
-import java.util.HashMap;
-
-import java.rmi.*;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 
 // First!
 //

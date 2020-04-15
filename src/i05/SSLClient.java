@@ -1,13 +1,14 @@
-package i07;
+package i05;
 
 import java.io.IOException;
 import java.net.*;
 
 // Second
 // 
-// java Client localhost 4444 lookup ola
+// java i05/SSLClient localhost 4444 lookup ola
+// Example of cyphers: SSL_RSA_WITH_RC4_128_MD5 | SSL_RSA_WITH_RC4_128_SHA | TLS_RSA_WITH_AES_128_CBC_SHA | TLS_DHE_RSA_WITH_AES_128_CBC_SHA
 
-public class Client {
+public class SSLClient {
 
     private static ClientHandler clientHandler;
 
@@ -25,7 +26,7 @@ public class Client {
     private static boolean parseArgs(final String[] args){
 
         if (args.length < 3) {
-            System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd>");
+            System.out.println("Usage: java Client <host_name> <port_number> <oper> <opnd> <cypher_suite>*");
 
             return false;
         }

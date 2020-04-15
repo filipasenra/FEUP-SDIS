@@ -1,39 +1,68 @@
-package i07;
+package i05;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 import java.io.IOException;
-import java.net.*;
-import java.rmi.Remote;
 import java.util.HashMap;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.InputStreamReader;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.net.ServerSocket;
-
 public class ServerHandler {
 
-    private HashMap<String, String> database = new HashMap<String, String>();
+    private HashMap<String, String> database = new HashMap<>();
 
     static String NOT_REGISTER = "-1";
     static String NOT_FOUND = "NOT_FOUND";
 
-    ServerSocket serverSocket;
+    SSLServerSocket serverSocket;
+    String[] cypher_suite;
 
-    public ServerHandler(int srvc_port) throws IOException{
+    public ServerHandler(int srvc_port, String[] cypher_suite){
 
-        serverSocket = new ServerSocket(srvc_port);
+
+        System.setProperty("javax.net.ssl.trustStoreType", "JKS");
+        System.setProperty("javax.net.ssl.trustStore", "i05/truststore");
+        System.setProperty("javax.net.ssl.trustStorePassword", "123456");
+        System.setProperty("javax.net.ssl.keyStore", "i05/server.keys");
+        System.setProperty("javax.net.ssl.keyStorePassword", "123456");
+
+
+        this.cypher_suite = cypher_suite;
+
+        try
+        {
+            SSLServerSocketFactory ssf = null;
+            ssf = (SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+
+            if(ssf == null)
+                System.out.println("NULL");
+
+            serverSocket = (SSLServerSocket) ssf.createServerSocket(srvc_port);
+
+            System.out.println("OLA");
+
+            if(cypher_suite.length==0){
+                serverSocket.setEnabledCipherSuites(ssf.getDefaultCipherSuites());
+            }
+            else{
+                serverSocket.setEnabledCipherSuites(cypher_suite);
+            }
+        }
+        catch( IOException e)
+        {
+            System.out.println("Server - Failed to create SSLServerSocket");
+            e.getMessage();
+        }
     }
 
     public void service() throws IOException {
 
         while (true) {
             //Receving Request from Client
-            Socket clientSocket = serverSocket.accept();
+            SSLSocket clientSocket = (SSLSocket) serverSocket.accept();
 
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader( new InputStreamReader(clientSocket.getInputStream()));
